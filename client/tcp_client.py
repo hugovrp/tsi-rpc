@@ -1,3 +1,9 @@
+"""
+    Módulo cliente TCP para comunicação RPC.
+
+    Gerencia a conexão TCP com o servidor, cache em memória e fallback para cache em disco quando o servidor está offline.
+"""
+
 import os
 import sys
 import json
@@ -17,6 +23,14 @@ data_config = config.load_config()
 CACHE_EXPIRATION_MINUTES = data_config.get('cache_expiration', 10)
 
 def load_disk_cache():
+    """
+        Carrega o cache persistente do disco.
+        
+        Tenta ler o arquivo de cache JSON do servidor. Se houver erro ou arquivo não existir, retorna dicionário vazio.
+        
+        Returns:
+            dict: Dicionário com operações cacheadas ou vazio.
+    """
     if os.path.exists(CACHE_FILE):
         try:
             with open(CACHE_FILE, 'r') as f:
@@ -26,6 +40,31 @@ def load_disk_cache():
     return {}
 
 def rpc_connection(command:str, host, port, use_cache:bool = True):
+    """
+        Estabelece conexão RPC com o servidor via TCP.
+        
+        Implementa sistema de cache em memória com expiração por tempo.
+        Em caso de servidor offline, tenta usar cache em disco do servidor.
+        
+        Args:
+            command (str): Comando a ser executado (ex: "sum 5 2").
+            host (str): Endereço IP do servidor.
+            port (int): Porta TCP do servidor.
+            use_cache (bool, optional): Se deve usar cache. Padrão: True.
+        
+        Returns:
+            any: Resposta do servidor (pode ser string, número, lista, etc).
+                 Respostas JSON são automaticamente deserializadas.
+        
+        Raises:
+            RPCServerNotFound: Se servidor offline e sem cache disponível.
+        
+        Note:
+            Cache em memória expira após tempo configurado (padrão: 1 minuto).
+            Cache em disco é usado como fallback se servidor offline.
+    """
+
+    # Verifica cache em memória
     if use_cache and command in operations_cache:
         cache_entry = operations_cache[command]
         timestamp = datetime.fromisoformat(cache_entry['timestamp'])
@@ -33,6 +72,7 @@ def rpc_connection(command:str, host, port, use_cache:bool = True):
             print('Retornando do cache em memória (cliente).')
             return cache_entry['response']
     
+    # Tenta acessar cache em disco se servidor offline
     disk_cache = load_disk_cache()
     try:
         check_status_server(host, port)
@@ -42,7 +82,8 @@ def rpc_connection(command:str, host, port, use_cache:bool = True):
             print('Servidor offline, usando cache de disco (servidor).')
             return cache_entry
         raise
-        
+
+    # Conecta ao servidor  
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
         client_socket.connect((host, port))
         client_socket.sendall((command).encode())
@@ -64,6 +105,22 @@ def rpc_connection(command:str, host, port, use_cache:bool = True):
         return response
 
 def check_status_server(host, port, timeout=2):
+    """
+        Verifica se o servidor RPC está online e acessível.
+        
+        Tenta estabelecer conexão TCP com timeout configurável.
+        
+        Args:
+            host (str): Endereço IP do servidor.
+            port (int): Porta TCP do servidor.
+            timeout (int, optional): Timeout em segundos. Padrão: 2.
+        
+        Returns:
+            bool: True se servidor está acessível.
+        
+        Raises:
+            RPCServerNotFound: Se não conseguir conectar ao servidor.
+    """
     try:
         with socket.create_connection((host, port), timeout=timeout):
             return True
