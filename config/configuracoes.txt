@@ -1,0 +1,6 @@
+{
+    "ip": "localhost",
+    "port": 7767,
+    "max_cache_size": 10000,
+    "cache_expiration": 1
+}
