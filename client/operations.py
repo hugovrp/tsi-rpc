@@ -1,9 +1,3 @@
-"""
-    Módulo de operações RPC.
-
-    Este módulo fornece a interface principal para o cliente realizar operações remotas através de RPC (Remote Procedure Call).
-"""
-
 import os
 import sys
 

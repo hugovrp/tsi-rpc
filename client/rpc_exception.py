@@ -1,9 +1,3 @@
-"""
-    Módulo de exceções customizadas para RPC.
-
-    Define exceções específicas para tratamento de erros em operações RPC.
-"""
-
 class RPCServerNotFound(Exception):
     """
         Exceção lançada quando o servidor RPC não está acessível.

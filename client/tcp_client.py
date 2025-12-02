@@ -1,9 +1,3 @@
-"""
-    Módulo cliente TCP para comunicação RPC.
-
-    Gerencia a conexão TCP com o servidor, cache em memória e fallback para cache em disco quando o servidor está offline.
-"""
-
 import os
 import sys
 import json

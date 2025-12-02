@@ -1,9 +1,3 @@
-"""
-    Módulo de configuração do sistema RPC.
-
-    Gerencia o carregamento de configurações a partir de arquivo JSON.
-"""
-
 import os 
 import json 
 

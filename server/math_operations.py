@@ -1,10 +1,3 @@
-"""
-    Módulo de operações matemáticas para o servidor RPC.
-
-    Implementa a lógica de negócio para todas as operações matemáticas suportadas pelo sistema, incluindo processamento paralelo para
-    verificação de números primos.
-"""
-
 import os
 import sys
 import math

@@ -1,9 +1,3 @@
-"""
-    Módulo de enumerações compartilhadas.
-
-    Define constantes para comandos matemáticos usados em todo o sistema.
-"""
-
 from enum import Enum
 
 class Math_Enum(Enum):

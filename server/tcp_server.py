@@ -1,9 +1,3 @@
-"""
-    Módulo servidor TCP para processar requisições RPC.
-
-    Gerencia conexões TCP, processa comandos, implementa cache em disco com limite de tamanho e fornece web scraping de notícias.
-"""
-
 import os
 import sys
 import json
