@@ -279,8 +279,6 @@ news = op.news()
 
 ### 6. Interface Gráfica Moderna
 
-![Interface GUI](https://img.shields.io/badge/GUI-CustomTkinter-purple)
-
 **Recursos da GUI:**
 - ✨ Tema dark moderno
 - 🧮 Calculadora com teclado numérico
