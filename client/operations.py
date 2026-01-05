@@ -81,7 +81,7 @@ class Operations:
         Raises:
             RPCServerNotFound: Se o servidor estiver offline e sem cache.
         """
-        return self._process_operation(MathEnum.SUM.value, *args)
+        pass
     
     @cache_operation(MathEnum.SUB.value)
     def sub(self, *args):
@@ -100,7 +100,7 @@ class Operations:
             Raises:
                 RPCServerNotFound: Se o servidor estiver offline e sem cache.
         """
-        return self._process_operation(MathEnum.SUB.value, *args)
+        pass
     
     @cache_operation(MathEnum.PROD.value)
     def prod(self, *args):
@@ -117,7 +117,7 @@ class Operations:
             Raises:
                 RPCServerNotFound: Se o servidor estiver offline e sem cache.
         """
-        return self._process_operation(MathEnum.PROD.value, *args)
+        pass
 
     @cache_operation(MathEnum.DIV.value)
     def div(self, *args):
@@ -136,7 +136,7 @@ class Operations:
         Raises:
             RPCServerNotFound: Se o servidor estiver offline e sem cache.
         """
-        return self._process_operation(MathEnum.DIV.value, *args)
+        pass
 
     @cache_operation(MathEnum.FAT.value)
     def fat(self, n=None):
@@ -155,7 +155,7 @@ class Operations:
         """
         if n is None:
             return 'Erro: É necessário fornecer um número para calcular o fatorial'
-        return self._process_operation(MathEnum.FAT.value, n)
+        pass
     
     @cache_operation(MathEnum.PRIM.value)
     def prim(self, *args):
@@ -171,7 +171,11 @@ class Operations:
             Raises:
                 RPCServerNotFound: Se o servidor estiver offline.
         """
-        return self._process_operation(MathEnum.PRIM.value, *args, use_cache = False)
+        pass
+
+    def solver(self, args):
+        pass
+    
 
     @cache_operation(NewsEnum.NEWS.value)
     def news(self):
@@ -191,4 +195,4 @@ class Operations:
             Note:
                 Esta operação depende da conectividade do servidor com a internet.
         """
-        return self._process_operation(NewsEnum.NEWS.value, use_cache=True)        
+        pass   

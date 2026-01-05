@@ -83,7 +83,7 @@ def rpc_connection(command:str, host, port, use_cache:bool = True):
     disk_cache = load_disk_cache()
     try:
         check_status_server(host, port)
-    except rpc_exception.RPCServerNotFound:
+    except RPCServerNotFound:
         if use_cache and command in disk_cache:
             cache_entry = disk_cache[command]
             print('Servidor offline, usando cache de disco (servidor).')
@@ -132,4 +132,4 @@ def check_status_server(host, port, timeout=2):
         with socket.create_connection((host, port), timeout=timeout):
             return True
     except (socket.timeout, ConnectionRefusedError, OSError):
-        raise rpc_exception.RPCServerNotFound(host, port) from None
+        raise RPCServerNotFound(host, port) from None

@@ -6,7 +6,7 @@
     "port_server1": 7777,
     
     "ip_server2": "localhost",
-    "port_server2": 7777,
+    "port_server2": 7767,
 
     "ip_server3": "localhost",
     "port_server3": 7777,

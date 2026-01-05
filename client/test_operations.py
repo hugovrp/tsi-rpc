@@ -8,14 +8,16 @@ op = Operations()
 """ Teste Servidor 1
 
 
+
+"""
+
 print(op.sum(5,2,2,2,2,2,2))
 print(op.prod(0,2,2,2))
 print(op.sub(5,2,2,2))
 print(op.div(0,2,2,2))
-"""
-
 
 """ Teste Servidor 2
+
 
 """
 print(op.fat(10))

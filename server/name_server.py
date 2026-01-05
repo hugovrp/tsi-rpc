@@ -5,31 +5,31 @@ import socket
 from config import config
 from common.enums import MathEnum, NewsEnum
 
+data_config = config.load_config()
+
 servers = {
       "server1": {
-            "server_ip": "localhost",
-            "server_port": "7777",
+            "server_ip": data_config['ip_server1'],
+            "server_port": data_config['port_server1'],
             "operations": [MathEnum.SUM.value, MathEnum.SUB.value, MathEnum.PROD.value, MathEnum.DIV.value]
       },
       "server2": {
-            "server_ip": "localhost",
-            "server_port": "7777",
+            "server_ip": data_config['ip_server2'],
+            "server_port": data_config['port_server2'],
             "operations": [MathEnum.FAT.value, MathEnum.PRIM.value]
       },
       "server3": {
-            "server_ip": "localhost",
-            "server_port": "7777",
+            "server_ip": data_config['ip_server3'],
+            "server_port": data_config['port_server3'],
             "operations": [NewsEnum.NEWS.value]
       }
 }
 
 def search_operation_server(servers, operation):
     for server_name, server_data in servers.items():    
-        if operation in server_data["operations"]:
-            return server_data["server_ip"], server_data["server_port"]
+        if operation in server_data['operations']:
+            return server_data['server_ip'], server_data['server_port']
     return None
-
-data_config = config.load_config()
 
 HOST = data_config['ip_name_server']
 PORT = data_config['port_name_server']
