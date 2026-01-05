@@ -18,11 +18,13 @@ def get_news():
         
         Returns:
             list[str]: Lista com até 5 manchetes de notícias.
-                       Retorna mensagem de erro em caso de falha.
-        
+                Retorna ['Nenhuma notícia encontrada!'] se vazio.
+                Em caso de erro, retorna [f'Erro ao obter as notícias: {e}'].
+
         Note:
             Requer conexão com a internet.
             Retorna lista vazia com mensagem se nenhuma notícia encontrada.
+            A estrutura HTML do site pode mudar, afetando o scraping.
     """
     try:
         response = requests.get('https://www.uol.com.br')
@@ -36,7 +38,25 @@ def get_news():
         return [f'Erro ao obter as notícias: {e}'] 
 
 def math_problem_solver(problem: str) -> str:
+    """
+        Resolve problemas matemáticos descritos em linguagem natural usando IA.
+        
+        Utiliza a API do Google Gemini para interpretar e resolver problemas matemáticos expressos em texto livre.
+        
+        Args:
+            problem (str): Descrição textual do problema matemático.
+        
+        Returns:
+            str: Resultado numérico com até 3 casas decimais.
+                Retorna "Erro: entrada inválida ou não matemática" se:
+                - O problema não for válido
+                - Não for uma questão matemática
+                - O resultado for impraticável
+                Retorna None em caso de erro na API.
 
+        Note:
+            Requer variável de ambiente GOOGLE_API_KEY configurada.
+    """
     if not problem or not problem.strip():
         return "Erro: problema matemático não informado"
 

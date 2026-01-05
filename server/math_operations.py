@@ -10,7 +10,7 @@ def _is_prime(n):
     """
         Verifica se um número é primo (função auxiliar interna).
         
-        Utilizada internamente pelo pool de multiprocessing.
+        Utilizada internamente pelo pool de multiprocessing na função number_theory() para verificação paralela de múltiplos números.
         
         Args:
             n (int): Número a ser verificado.
@@ -44,29 +44,28 @@ def check_primes(number):
 
 def basic_operations(data):
     """
-        Processa comando matemático e retorna resultado.
+        Executa operações aritméticas básicas a partir de comandos textuais.
         
-        Parser principal que recebe string de comando, identifica a operação e executa o cálculo correspondente.
+        Parser que identifica o comando e executa a operação correspondente:
+        - sum: soma todos os argumentos
+        - sub: subtração sequencial (a - b - c - ...)
+        - prod: multiplicação de todos os argumentos
+        - div: divisão sequencial (a / b / c / ...)
         
         Args:
-            data (str): String com comando e argumentos separados por espaço.
-                        Formato: "comando arg1 arg2 arg3 ..."
-                        Comandos válidos: sum, sub, prod, div, fat, prim
+            data (str): String no formato "comando arg1 arg2 arg3 ..."
         
         Returns:
-            float: Resultado para operações aritméticas (sum, sub, prod, div).
-            int: Resultado para fatorial (fat).
-            list[bool]: Lista de booleanos para verificação de primos (prim).
-            str: Mensagem de erro em caso de falha.
-        
-        Raises:
-            Não lança exceções diretamente, retorna strings de erro.
+            float: Resultado da operação aritmética.
+            str: Mensagem de erro se:
+                - Comando desconhecido
+                - Nenhum argumento fornecido
+                - Divisão por zero (para div)
+                - Erro no parsing dos argumentos
         
         Note:
-            - Operação 'prim' usa multiprocessing com pool de 4 processos
-            - Suporta números muito grandes (até 1.000.000 dígitos)
-            - Divisão por zero retorna mensagem de erro
-            - Fatorial de números negativos retorna erro
+            Aceita argumentos decimais (float).
+            Requer pelo menos um argumento numérico.
     """
     try:
         parts = data.strip().split()
@@ -118,6 +117,28 @@ def basic_operations(data):
         return 'Erro'
 
 def number_theory(data):
+    """
+        Executa operações de teoria dos números (fatorial e primalidade).
+        
+        Processa comandos relacionados a propriedades numéricas:
+        - fat: calcula o fatorial de um número
+        - prim: verifica se múltiplos números são primos (paralelo)
+        
+        Args:
+            data (str): String no formato "comando arg1 arg2 ..."
+        
+        Returns:
+            int: Fatorial do número (para comando 'fat').
+            list[bool]: Lista de resultados booleanos (para comando 'prim').
+            str: Mensagem de erro se:
+                - Comando desconhecido
+                - Fatorial de número negativo
+                - Erro no parsing dos argumentos
+        
+        Note:
+            Usa multiprocessing com pool de 4 processos para 'prim'.
+            Suporta fatoriais muito grandes (até 1.000.000 dígitos).
+    """
     try:
         parts = data.strip().split()
         
