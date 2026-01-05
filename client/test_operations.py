@@ -1,22 +1,32 @@
 import os
 import ast
 import sys
-from operations import Operations
+from client.operations import Operations
 
 op = Operations()
 
-numeros = list(range(100000))
+""" Teste Servidor 1
+
+
+print(op.sum(5,2,2,2,2,2,2))
+print(op.prod(0,2,2,2))
+print(op.sub(5,2,2,2))
+print(op.div(0,2,2,2))
+"""
+
+
+""" Teste Servidor 2
+
+"""
+print(op.fat(10))
+
+numeros = list(range(10))
 
 print(op.prim(*numeros))
 
-'''
-print(op.sum(5,2,2,2,2,2,2))
-print(op.sum(5,2,2,2,2,2,2))
-print(op.prod(0,2,2,2))
-print(op.fat(10))
-print(op.sub(5,2,2,2))
-print(op.div(0,2,2,2))
 
+
+""" Teste Servidor 3
 
 news = op.news()
 
@@ -26,4 +36,4 @@ if isinstance(news, list):
         print(f"{i}. {n}")
 else:
     print("Erro ou resposta inesperada:", news)
-'''
+"""

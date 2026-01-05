@@ -1,6 +1,16 @@
 {
-    "ip": "localhost",
-    "port": 7767,
+    "ip_name_server": "localhost",
+    "port_name_server": 7776,
+
+    "ip_server1": "localhost",
+    "port_server1": 7777,
+    
+    "ip_server2": "localhost",
+    "port_server2": 7777,
+
+    "ip_server3": "localhost",
+    "port_server3": 7777,
+
     "max_cache_size": 10000,
     "cache_expiration": 1
 }

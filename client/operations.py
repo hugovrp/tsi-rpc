@@ -1,17 +1,13 @@
 import os
 import sys
-
-# Adiciona o diretório pai ao sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 from config import config
-from tcp_client import rpc_connection
-from common.enums import Math_Enum
+from client.tcp_client import dns_connection
+from common.enums import MathEnum, NewsEnum
 
 data_config = config.load_config()
 
-HOST = data_config['ip']
-PORT = data_config['port']
+HOST = data_config['ip_name_server']
+PORT = data_config['port_name_server']
 
 def cache_operation(cmd):
     """
@@ -68,9 +64,9 @@ class Operations:
                 any: Resultado retornado pelo servidor.
         """
         str_args = ' '.join(str(a) for a in args)   
-        return rpc_connection(f'{cmd} {str_args}', self.ip, self.port, use_cache=use_cache)
+        return dns_connection(f'{cmd} {str_args}', self.ip, self.port, use_cache=use_cache)
         
-    @cache_operation(Math_Enum.SUM.value)
+    @cache_operation(MathEnum.SUM.value)
     def sum(self, *args):
         """
         Realiza a soma de múltiplos números.
@@ -85,9 +81,9 @@ class Operations:
         Raises:
             RPCServerNotFound: Se o servidor estiver offline e sem cache.
         """
-        return self._process_operation(Math_Enum.SUM.value, *args)
+        return self._process_operation(MathEnum.SUM.value, *args)
     
-    @cache_operation(Math_Enum.SUB.value)
+    @cache_operation(MathEnum.SUB.value)
     def sub(self, *args):
         """
             Realiza a subtração sequencial de múltiplos números.
@@ -104,9 +100,9 @@ class Operations:
             Raises:
                 RPCServerNotFound: Se o servidor estiver offline e sem cache.
         """
-        return self._process_operation(Math_Enum.SUB.value, *args)
+        return self._process_operation(MathEnum.SUB.value, *args)
     
-    @cache_operation(Math_Enum.PROD.value)
+    @cache_operation(MathEnum.PROD.value)
     def prod(self, *args):
         """
             Realiza a multiplicação de múltiplos números.
@@ -121,9 +117,9 @@ class Operations:
             Raises:
                 RPCServerNotFound: Se o servidor estiver offline e sem cache.
         """
-        return self._process_operation(Math_Enum.PROD.value, *args)
+        return self._process_operation(MathEnum.PROD.value, *args)
 
-    @cache_operation(Math_Enum.DIV.value)
+    @cache_operation(MathEnum.DIV.value)
     def div(self, *args):
         """
         Realiza a divisão sequencial de múltiplos números.
@@ -140,9 +136,9 @@ class Operations:
         Raises:
             RPCServerNotFound: Se o servidor estiver offline e sem cache.
         """
-        return self._process_operation(Math_Enum.DIV.value, *args)
+        return self._process_operation(MathEnum.DIV.value, *args)
 
-    @cache_operation(Math_Enum.FAT.value)
+    @cache_operation(MathEnum.FAT.value)
     def fat(self, n=None):
         """
             Calcula o fatorial de um número.
@@ -159,9 +155,9 @@ class Operations:
         """
         if n is None:
             return 'Erro: É necessário fornecer um número para calcular o fatorial'
-        return self._process_operation(Math_Enum.FAT.value, n)
+        return self._process_operation(MathEnum.FAT.value, n)
     
-    #@cache_operation(Math_Enum.PRIM.value)
+    @cache_operation(MathEnum.PRIM.value)
     def prim(self, *args):
         """
             Verifica se números são primos usando processamento paralelo.
@@ -175,9 +171,9 @@ class Operations:
             Raises:
                 RPCServerNotFound: Se o servidor estiver offline.
         """
-        return self._process_operation(Math_Enum.PRIM.value, *args, use_cache = False)
+        return self._process_operation(MathEnum.PRIM.value, *args, use_cache = False)
 
-    @cache_operation('news')
+    @cache_operation(NewsEnum.NEWS.value)
     def news(self):
         """
             Obtém as principais manchetes de notícias do UOL.
@@ -195,6 +191,4 @@ class Operations:
             Note:
                 Esta operação depende da conectividade do servidor com a internet.
         """
-        return self._process_operation('news', use_cache=True)
-    
-            
+        return self._process_operation(NewsEnum.NEWS.value, use_cache=True)        

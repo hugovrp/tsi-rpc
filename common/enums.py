@@ -1,6 +1,6 @@
 from enum import Enum
 
-class Math_Enum(Enum):
+class MathEnum(Enum):
     """
         Enumeração de comandos matemáticos disponíveis no sistema RPC.
         
@@ -18,3 +18,6 @@ class Math_Enum(Enum):
     DIV = 'div'
     FAT = 'fat'
     PRIM = 'prim'
+
+class NewsEnum(Enum):
+    NEWS = 'news'

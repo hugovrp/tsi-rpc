@@ -4,7 +4,7 @@ import json
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(BASE_DIR, "configuracoes.txt")
 
-def load_config() :
+def load_config():
     """
         Carrega configurações do sistema a partir de arquivo JSON.
         

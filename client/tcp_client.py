@@ -3,12 +3,8 @@ import sys
 import json
 import socket
 from datetime import datetime, timedelta
-
-# Adiciona o diretório pai ao sys.path para enxergar a pasta 'config'
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 from config import config
-import rpc_exception
+from client.rpc_exception import RPCServerNotFound
 
 CACHE_FILE = 'cache_operations.json'
 
@@ -32,6 +28,23 @@ def load_disk_cache():
         except:
             return {}
     return {}
+
+def dns_connection(operation:str, host, port, use_cache:bool = True):
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as client_socket:
+
+        parts = operation.strip().split()
+        cmd = parts[0]
+
+        client_socket.sendto((cmd).encode(), (host, port))
+
+        data, addr = client_socket.recvfrom(1024 * 1024)
+
+        response = json.loads(data.decode())
+
+        server_ip = response["server_ip"]
+        server_port = int(response["server_port"])
+
+        return rpc_connection(operation, server_ip, server_port, use_cache)
 
 def rpc_connection(command:str, host, port, use_cache:bool = True):
     """
