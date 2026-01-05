@@ -2,7 +2,7 @@ import os
 import sys
 from config import config
 from client.tcp_client import dns_connection
-from common.enums import MathEnum, NewsEnum
+from common.enums import OperationsEnum
 
 data_config = config.load_config()
 
@@ -24,6 +24,15 @@ def cache_operation(cmd):
     def decorator(func):
         def wrapper(self, *args, **kwargs):
             return self._process_operation(cmd, *args, use_cache=True, **kwargs)
+        return wrapper
+    return decorator
+
+def cache_text_operation(cmd):
+    def decorator(func):
+        def wrapper(self, text: str, **kwargs):
+            if not text or not isinstance(text, str):
+                return 'Erro: problema inválido'
+            return self._process_text_operation(cmd, text, use_cache=True)
         return wrapper
     return decorator
 
@@ -63,27 +72,35 @@ class Operations:
             Returns:
                 any: Resultado retornado pelo servidor.
         """
+
+        if cmd == OperationsEnum.FAT.value:
+            if not args or args[0] is None:
+                return 'Erro: É necessário fornecer um número para calcular o fatorial'
+
         str_args = ' '.join(str(a) for a in args)   
         return dns_connection(f'{cmd} {str_args}', self.ip, self.port, use_cache=use_cache)
-        
-    @cache_operation(MathEnum.SUM.value)
+
+    def _process_text_operation(self, cmd, text, use_cache=False):
+        return dns_connection(f'{cmd} {text}', self.ip, self.port, use_cache=use_cache)
+      
+    @cache_operation(OperationsEnum.SUM.value)
     def sum(self, *args):
         """
-        Realiza a soma de múltiplos números.
-        
-        Args:
-            *args (float | int): Números a serem somados.
-        
-        Returns:
-            float: Resultado da soma.
-            str: Mensagem de erro se nenhum argumento fornecido.
-        
-        Raises:
-            RPCServerNotFound: Se o servidor estiver offline e sem cache.
+            Realiza a soma de múltiplos números.
+            
+            Args:
+                *args (float | int): Números a serem somados.
+            
+            Returns:
+                float: Resultado da soma.
+                str: Mensagem de erro se nenhum argumento fornecido.
+            
+            Raises:
+                RPCServerNotFound: Se o servidor estiver offline e sem cache.
         """
         pass
     
-    @cache_operation(MathEnum.SUB.value)
+    @cache_operation(OperationsEnum.SUB.value)
     def sub(self, *args):
         """
             Realiza a subtração sequencial de múltiplos números.
@@ -102,7 +119,7 @@ class Operations:
         """
         pass
     
-    @cache_operation(MathEnum.PROD.value)
+    @cache_operation(OperationsEnum.PROD.value)
     def prod(self, *args):
         """
             Realiza a multiplicação de múltiplos números.
@@ -119,26 +136,26 @@ class Operations:
         """
         pass
 
-    @cache_operation(MathEnum.DIV.value)
+    @cache_operation(OperationsEnum.DIV.value)
     def div(self, *args):
         """
-        Realiza a divisão sequencial de múltiplos números.
-        
-        Divide o primeiro número pelo segundo, depois o resultado pelo terceiro, e assim por diante.
-        
-        Args:
-            *args (float | int): Números para divisão sequencial.
-        
-        Returns:
-            float: Resultado da divisão.
-            str: Mensagem de erro se divisão por zero ou sem argumentos.
-        
-        Raises:
-            RPCServerNotFound: Se o servidor estiver offline e sem cache.
+            Realiza a divisão sequencial de múltiplos números.
+            
+            Divide o primeiro número pelo segundo, depois o resultado pelo terceiro, e assim por diante.
+            
+            Args:
+                *args (float | int): Números para divisão sequencial.
+            
+            Returns:
+                float: Resultado da divisão.
+                str: Mensagem de erro se divisão por zero ou sem argumentos.
+            
+            Raises:
+                RPCServerNotFound: Se o servidor estiver offline e sem cache.
         """
         pass
 
-    @cache_operation(MathEnum.FAT.value)
+    @cache_operation(OperationsEnum.FAT.value)
     def fat(self, n=None):
         """
             Calcula o fatorial de um número.
@@ -153,11 +170,9 @@ class Operations:
             Raises:
                 RPCServerNotFound: Se o servidor estiver offline e sem cache.
         """
-        if n is None:
-            return 'Erro: É necessário fornecer um número para calcular o fatorial'
         pass
     
-    @cache_operation(MathEnum.PRIM.value)
+    @cache_operation(OperationsEnum.PRIM.value)
     def prim(self, *args):
         """
             Verifica se números são primos usando processamento paralelo.
@@ -173,11 +188,11 @@ class Operations:
         """
         pass
 
-    def solver(self, args):
+    @cache_text_operation(OperationsEnum.SOLVER.value)
+    def solver(self, problem: str):
         pass
-    
 
-    @cache_operation(NewsEnum.NEWS.value)
+    @cache_operation(OperationsEnum.NEWS.value)
     def news(self):
         """
             Obtém as principais manchetes de notícias do UOL.

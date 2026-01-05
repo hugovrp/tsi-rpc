@@ -3,6 +3,8 @@ import json
 import socket
 import requests
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
+import google.generativeai as genai
 from config import config, cache_config
 
 SERVER_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -32,6 +34,49 @@ def get_news():
         return headlines[:5] or ['Nenhuma notícia encontrada!']
     except Exception as e:
         return [f'Erro ao obter as notícias: {e}'] 
+
+def math_problem_solver(problem: str) -> str:
+
+    if not problem or not problem.strip():
+        return "Erro: problema matemático não informado"
+
+    problem = problem.strip()
+
+    load_dotenv()
+    API_KEY = os.getenv("GOOGLE_API_KEY")
+
+    prompt = f"""
+        Você é um serviço de resolução de problemas matemáticos.
+
+        TAREFA:
+        1. Analise se o texto abaixo descreve um problema matemático válido.
+        2. Se a operação estiver incompleta ou ambígua, retorne: ERRO
+        3. Se NÃO for um problema matemático, retorne exatamente: ERRO
+        4. Se o resultado for muito grande ou impraticável, retorne: ERRO
+        5. Se for, resolva o problema usando raciocínio passo a passo internamente.
+        6. NÃO mostre o raciocínio.
+        7. Retorne APENAS o resultado final numérico.
+        8. Se o resultado for decimal, arredonde para no máximo 3 casas decimais.
+
+        Texto:
+        {problem}
+    """
+
+    try:
+        genai.configure(api_key=API_KEY)
+        model = genai.GenerativeModel('gemini-2.5-flash')
+
+        response = model.generate_content(prompt)
+        result = response.text.strip()
+
+        if not result or result.upper() == "ERRO":
+            return "Erro: entrada inválida ou não matemática"
+
+        print(result)
+
+        return result
+    except Exception as e:
+        return None
 
 # Inicialização do servidor
 operations_cache = cache_config.load_cache(CACHE_FILE)
@@ -65,3 +110,14 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
 
                 conn.send(json.dumps(response).encode())
                 continue
+            
+            if data in operations_cache:
+                print('Pegando valor do cache (servidor JSON).')
+                response = operations_cache[data]
+            else:
+                response = math_problem_solver(data)
+                cache_config.enforce_cache_limit(operations_cache, CACHE_FILE, MAX_CACHE_SIZE, data, response)
+
+            conn.send(str(response).encode())
+
+

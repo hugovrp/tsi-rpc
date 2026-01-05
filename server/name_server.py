@@ -3,7 +3,7 @@ import sys
 import json
 import socket
 from config import config
-from common.enums import MathEnum, NewsEnum
+from common.enums import OperationsEnum
 
 data_config = config.load_config()
 
@@ -11,17 +11,17 @@ servers = {
       "server1": {
             "server_ip": data_config['ip_server1'],
             "server_port": data_config['port_server1'],
-            "operations": [MathEnum.SUM.value, MathEnum.SUB.value, MathEnum.PROD.value, MathEnum.DIV.value]
+            "operations": [OperationsEnum.SUM.value, OperationsEnum.SUB.value, OperationsEnum.PROD.value, OperationsEnum.DIV.value]
       },
       "server2": {
             "server_ip": data_config['ip_server2'],
             "server_port": data_config['port_server2'],
-            "operations": [MathEnum.FAT.value, MathEnum.PRIM.value]
+            "operations": [OperationsEnum.FAT.value, OperationsEnum.PRIM.value]
       },
       "server3": {
             "server_ip": data_config['ip_server3'],
             "server_port": data_config['port_server3'],
-            "operations": [NewsEnum.NEWS.value]
+            "operations": [OperationsEnum.SOLVER.value, OperationsEnum.NEWS.value]
       }
 }
 

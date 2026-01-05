@@ -2,7 +2,7 @@ import os
 import sys
 import math
 import multiprocessing
-from common.enums import MathEnum
+from common.enums import OperationsEnum
 
 sys.set_int_max_str_digits(1000000)
 
@@ -74,14 +74,14 @@ def basic_operations(data):
         cmd = parts[0]
         args = parts[1:]  
 
-        if cmd == MathEnum.SUM.value:
+        if cmd == OperationsEnum.SUM.value:
             if not args:
                 return 'Erro: A operação requer pelo menos um número'
             
             nums = [float(a) for a in args]
             return sum(nums)
     
-        elif cmd == MathEnum.SUB.value:
+        elif cmd == OperationsEnum.SUB.value:
             if not args:
                 return 'Erro: A operação requer pelo menos um número'
             
@@ -91,7 +91,7 @@ def basic_operations(data):
                 total -= i
             return total
 
-        elif cmd == MathEnum.PROD.value:
+        elif cmd == OperationsEnum.PROD.value:
             if not args:
                 return 'Erro: A operação requer pelo menos um número'
 
@@ -100,7 +100,7 @@ def basic_operations(data):
             for i in nums[1:]:
                 total *= i
             return total
-        elif cmd == MathEnum.DIV.value:
+        elif cmd == OperationsEnum.DIV.value:
             if not args:
                 return 'Erro: A operação requer pelo menos um número'
 
@@ -123,12 +123,12 @@ def number_theory(data):
         
         cmd = parts[0]
         args = parts[1:]  
-        if cmd == MathEnum.FAT.value:
+        if cmd == OperationsEnum.FAT.value:
             num = int(args[0])
             if num < 0:
                 return "Erro: fatorial não é definido para números negativos"
             return math.factorial(num)
-        elif cmd == MathEnum.PRIM.value:
+        elif cmd == OperationsEnum.PRIM.value:
             numbers_list = [int(i) for i in args]
 
             with multiprocessing.Pool(processes=4) as pool:

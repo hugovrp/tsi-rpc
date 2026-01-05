@@ -35,7 +35,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
                 response = operations_cache[data]
             else:
                 response = number_theory(data)
-
                 cache_config.enforce_cache_limit(operations_cache, CACHE_FILE, MAX_CACHE_SIZE, data, response)
                 
             conn.send(str(response).encode())

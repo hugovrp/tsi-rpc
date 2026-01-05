@@ -1,8 +1,8 @@
 from enum import Enum
 
-class MathEnum(Enum):
+class OperationsEnum(Enum):
     """
-        Enumeração de comandos matemáticos disponíveis no sistema RPC.
+        Enumeração de comandos disponíveis no sistema RPC.
         
         Attributes:
             SUM (str): Comando de soma ('sum').
@@ -18,6 +18,5 @@ class MathEnum(Enum):
     DIV = 'div'
     FAT = 'fat'
     PRIM = 'prim'
-
-class NewsEnum(Enum):
+    SOLVER = 'solver'
     NEWS = 'news'
