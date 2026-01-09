@@ -1,6 +1,6 @@
 # 🔄 Sistema RPC Multi-Server - Remote Procedure Call
 
-> Sistema distribuído desenvolvido em Python para execução remota de operações matemáticas com arquitetura de múltiplos servidores, Name Server (DNS), cache inteligente, solver de IA e interface gráfica moderna.
+> Sistema distribuído desenvolvido em Python para execução remota de operações matemáticas com arquitetura de múltiplos servidores, Name Server (DNS), cache inteligente e uma interface de calculadora de hardware real integrada a um Solver de IA com Chain of Thought (CoT).
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue?style=for-the-badge&logo=python)](https://www.python.org/)
 [![Socket](https://img.shields.io/badge/Socket-TCP/IP-green?style=for-the-badge&logo=socketdotio)](https://docs.python.org/3/library/socket.html)
@@ -18,12 +18,11 @@
 
 - 🌐 **Arquitetura Distribuída**: Name Server (DNS) para descoberta automática de servidores
 - 🧮 **Operações Matemáticas**: Soma, subtração, multiplicação, divisão, fatorial e verificação de primos
-- 🤖 **Solver de IA**: Resolução de problemas matemáticos em linguagem natural (Google Gemini)
+- 🤖 **Solver de IA com CoT**: Resolução de problemas matemáticos em linguagem natural com raciocínio passo a passo (Google Gemini)
+- 🖥️ **Interface "Real-Feel"**: GUI moderna simulando calculadora de hardware com lógica de acumulador e encadeamento de operações
 - 💾 **Cache Multinível**: Cache em memória (cliente) e cache em disco (servidor)
 - 🔄 **Processamento Paralelo**: Uso de multiprocessing para operações pesadas
 - 📰 **Web Scraping**: Integração com notícias do UOL
-- 🖥️ **Interface Gráfica**: GUI moderna com CustomTkinter (modo dark)
-- ⚡ **Alta Performance**: Gerenciamento inteligente de cache com limite de tamanho
 - 🛡️ **Fallback**: Sistema funciona mesmo com servidor offline usando cache
 
 > **Disciplina**: Sistemas Distribuídos  
@@ -39,10 +38,11 @@
 - **Socket TCP/IP** - Comunicação cliente-servidor
 - **Socket UDP** - Name Server (descoberta de serviços)
 - **Multiprocessing** - Processamento paralelo
+- **Threading** - Interface não-bloqueante
 
 ### Bibliotecas
 - **CustomTkinter 5.2+** - Interface gráfica moderna
-- **Google Generative AI** - Solver matemático com IA (Gemini)
+- **Google Generative AI** - Solver matemático com IA (Gemini 2.5 Flash)
 - **BeautifulSoup4** - Web scraping de notícias
 - **Requests** - Requisições HTTP
 - **Python-dotenv** - Gerenciamento de variáveis de ambiente
@@ -147,7 +147,41 @@ O arquivo `config/configuracoes.txt` contém as configurações do sistema:
 
 ## 🎯 Funcionalidades Principais
 
-### 1. Arquitetura Multi-Server com Name Server (DNS)
+### 1. Interface "Real-Feel" & UX Aprimorada
+
+A interface foi completamente reconstruída para operar como uma calculadora de hardware real.
+
+#### ⚡ Interface Assíncrona (Multithreading)
+- **Chamadas Não-Bloqueantes**: Todas as operações RPC são executadas em threads separadas
+- **UI Responsiva**: A interface nunca "congela" enquanto aguarda resposta do servidor
+- **Feedback Visual**: Logs em tempo real das operações sendo executadas
+- **Experiência Fluida**: O usuário pode continuar interagindo com a interface mesmo durante operações pesadas
+
+```python
+# Exemplo de chamada assíncrona
+def _execute_calc(self, next_op=None):
+    def task():
+        try:
+            res = self.pending_operator(val1, val2)
+            self.root.after(0, lambda: self._update_ui_after_rpc(res, next_op))
+        except Exception as e:
+            self.root.after(0, lambda: messagebox.showerror("Erro RPC", str(e)))
+    
+    threading.Thread(target=task, daemon=True).start()
+```
+
+**Recursos da GUI:**
+- ✨ Tema dark moderno
+- 🧮 Calculadora com lógica de acumulador
+- 🔢 Operações básicas e avançadas (fatorial, primo)
+- ⛓️ Encadeamento de operações contínuas
+- ⚡ Interface assíncrona não-bloqueante
+- 🤖 Campo para Solver de IA com CoT
+- 💡 Dica visual sobre complexidade de operações
+- 📰 Botão para buscar notícias atualizadas
+- 📜 Área de logs em tempo real
+
+### 2. Arquitetura Multi-Server com Name Server (DNS)
 
 ```
 ┌─────────────────┐         ┌─────────────────┐
@@ -179,7 +213,7 @@ O arquivo `config/configuracoes.txt` contém as configurações do sistema:
 3. Cliente conecta diretamente ao Servidor 1 via TCP
 4. Servidor 1 processa e retorna resultado
 
-### 2. Sistema de Cache Multinível
+### 3. Sistema de Cache Multinível
 
 #### Cache em Memória (Cliente)
 ```python
@@ -201,7 +235,7 @@ def enforce_cache_limit(cache, file, max_size, new_key, new_value):
     # Retorna True se adicionado com sucesso
 ```
 
-### 2. Operações Matemáticas
+### 4. Operações Matemáticas
 
 #### Operações Básicas (Servidor 1)
 ```python
@@ -231,7 +265,7 @@ results = op.prim(*numbers)
 # [True, True, False, True, True, False]
 ```
 
-### 4. Solver de IA com Google Gemini (Servidor 3)
+### 5. Solver de IA (CoT) com Google Gemini (Servidor 3)
 
 ```python
 # Resolve problemas matemáticos em linguagem natural
@@ -251,19 +285,31 @@ def math_problem_solver(problem: str) -> str:
     genai.configure(api_key=API_KEY)
     model = genai.GenerativeModel('gemini-2.5-flash')
     
+    # Prompt estruturado para CoT
     prompt = f"""
     Você é um serviço de resolução de problemas matemáticos.
-    Se não for matemático, retorne: ERRO
-    Caso contrário, resolva e retorne APENAS o resultado numérico.
+    
+    TAREFA:
+    1. Responde APENAS em JSON.
+    2. Analise se o texto abaixo descreve um problema matemático válido.
+    3. Se for válido, explique o raciocínio passo a passo.
+    
+    FORMATO DE RESPOSTA (JSON VÁLIDO):
+    {{
+        "erro": false,
+        "raciocínio": ["passo 1", "passo 2", ...],
+        "resultado": 
+    }}
     
     Texto: {problem}
     """
     
     response = model.generate_content(prompt)
-    return response.text.strip()
+    # Processa JSON e retorna resultado
+    return str(data.get('resultado'))
 ```
 
-### 5. Web Scraping de Notícias (Servidor 3)
+### 6. Web Scraping de Notícias (Servidor 3)
 
 ```python
 # Busca as 5 principais manchetes do UOL
@@ -276,16 +322,6 @@ news = op.news()
 #   ...
 # ]
 ```
-
-### 6. Interface Gráfica Moderna
-
-**Recursos da GUI:**
-- ✨ Tema dark moderno
-- 🧮 Calculadora com teclado numérico
-- 🔢 Operações básicas e avançadas
-- 🤖 Campo para Solver de IA
-- 📰 Botão para buscar notícias
-- 📜 Área de logs e histórico
 
 ---
 
@@ -328,7 +364,29 @@ cd client
 python gui_app.py
 ```
 
-### 4️⃣ Usar a API em Seu Código
+### 4️⃣ Usar a Calculadora
+
+#### Operações Simples:
+1. Digite o primeiro número usando os botões numéricos
+2. Pressione o operador (+, -, *, /)
+3. Digite o segundo número
+4. Pressione "=" para ver o resultado
+
+#### Encadeamento de Operações:
+1. `10` → `+` → `5` → `-` (resolve 10+5 automaticamente) → `3` → `=`
+2. A interface mantém o resultado acumulado e permite continuar calculando
+
+#### Operações Avançadas:
+- `!` (fatorial): Digite um número e pressione "!"
+- `?` (primo): Digite um número e pressione "?"
+
+#### Solver de IA:
+Para expressões complexas (ex: "raiz quadrada de 144", "(10+5)*2", "30% de 200"):
+1. Digite a expressão no campo "IA Solver"
+2. Clique em "Resolver com IA"
+3. Veja o resultado e o raciocínio passo a passo nos logs
+
+### 5️⃣ Usar a API em Seu Código
 
 ```python
 from client.operations import Operations
@@ -346,9 +404,9 @@ numeros = [2, 3, 4, 5, 17, 19, 20]
 primos = op.prim(*numeros)
 print(primos)  # [True, True, False, True, True, True, False]
 
-# Solver de IA
+# Solver de IA com CoT
 resultado = op.solver("Calcule a raiz cúbica de 27")
-print(resultado)  # '3'
+print(resultado)  # '3' (com raciocínio passo a passo no servidor)
 
 # Buscar notícias
 noticias = op.news()
@@ -360,56 +418,70 @@ for i, noticia in enumerate(noticias, 1):
 
 ## 🏗️ Arquitetura do Sistema
 
+O sistema segue o modelo de camadas para garantir escalabilidade:
+
+1. **Client (GUI/Operations)**: Captura a intenção do usuário e gerencia a lógica de acumulador
+2. **Name Server (DNS)**: Atua como o "Páginas Amarelas" do sistema, mapeando operações para `IP:Porta`
+3. **Servers (Workers)**: Executam o processamento pesado e retornam os dados via sockets TCP
+
 ### Fluxo Completo de uma Operação
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │                         CLIENTE                              │
 │                                                              │
-│  1. op.sum(5, 2, 3)                                         │
+│  1. Usuário pressiona: 10 + 5                                │
 │     ↓                                                        │
-│  2. Verifica cache em memória (expirado?)                   │
-│     ↓ [MISS]                                                │
-│  3. Consulta Name Server via UDP: "sum"                     │
+│  2. Armazena: stored_value=10, pending_operator=sum          │
+│     ↓                                                        │
+│  3. Usuário pressiona: -                                     │
+│     ↓                                                        │
+│  4. Executa pendente em thread: sum(10, 5)                   │
+│     ↓                                                        │
+│  5. Verifica cache em memória (expirado?)                    │
+│     ↓ [MISS]                                                 │
+│  6. Consulta Name Server via UDP: "sum"                      │
 └──────────────────────┬───────────────────────────────────────┘
                        │ UDP
                        ▼
 ┌──────────────────────────────────────────────────────────────┐
 │                     NAME SERVER (DNS)                        │
 │                                                              │
-│  4. Busca em dicionário: servers["server1"]["operations"]   │
+│  7. Busca em dicionário: servers["server1"]["operations"]    │
 │     ↓                                                        │
-│  5. Retorna: {"server_ip": "127.0.0.1", "port": 5001}      │
+│  8. Retorna: {"server_ip": "127.0.0.1", "port": 5001}        │
 └──────────────────────┬───────────────────────────────────────┘
                        │ UDP Response
                        ▼
 ┌──────────────────────────────────────────────────────────────┐
 │                         CLIENTE                              │
 │                                                              │
-│  6. Recebe IP e porta do servidor responsável               │
+│  9. Recebe IP e porta do servidor responsável                │
 │     ↓                                                        │
-│  7. Conecta via TCP ao servidor específico                  │
+│ 10. Conecta via TCP ao servidor específico                   │
 └──────────────────────┬───────────────────────────────────────┘
-                       │ TCP: "sum 5 2 3"
+                       │ TCP: "sum 10 5"
                        ▼
 ┌──────────────────────────────────────────────────────────────┐
 │                       SERVIDOR 1                             │
 │                                                              │
-│  8. Verifica cache em disco                                 │
-│     ↓ [MISS]                                                │
-│  9. Executa: basic_operations("sum 5 2 3")                  │
+│ 11. Verifica cache em disco                                  │
+│     ↓ [MISS]                                                 │
+│ 12. Executa: basic_operations("sum 10 5")                    │
 │     ↓                                                        │
-│ 10. Salva no cache: {"sum 5 2 3": 10.0}                    │
+│ 13. Salva no cache: {"sum 10 5": 15.0}                       │
 │     ↓                                                        │
-│ 11. Retorna resultado: 10.0                                 │
+│ 14. Retorna resultado: 15.0                                  │
 └──────────────────────┬───────────────────────────────────────┘
                        │ TCP Response
                        ▼
 ┌──────────────────────────────────────────────────────────────┐
 │                         CLIENTE                              │
 │                                                              │
-│ 12. Salva no cache em memória com timestamp                 │
-│ 13. Retorna resultado ao usuário: 10.0                      │
+│ 15. Thread atualiza UI via root.after()                      │
+│ 16. Salva no cache em memória com timestamp                  │
+│ 17. Atualiza visor: 15                                       │
+│ 18. Prepara próximo operador: pending_operator=sub           │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -431,7 +503,8 @@ for i, noticia in enumerate(noticias, 1):
 - ✅ Validação de fatorial para números negativos
 - ✅ Try-catch em operações de I/O e rede
 - ✅ Verificação de disponibilidade do servidor
-- ✅ Validação de entrada do Solver de IA
+- ✅ Validação de entrada do Solver de IA (JSON parsing robusto)
+- ✅ Thread-safety nas atualizações de UI
 
 ### 2. Gerenciamento de Cache
 - ✅ Limite de tamanho configurável
@@ -441,6 +514,7 @@ for i, noticia in enumerate(noticias, 1):
 - ✅ Validação de tamanho antes de adicionar
 
 ### 3. Performance
+- ✅ Interface assíncrona (threading) - UI nunca bloqueia
 - ✅ Processamento paralelo para verificação de primos (4 processos)
 - ✅ Suporte a números grandes (até 1.000.000 dígitos)
 - ✅ Cache multinível (memória + disco)
