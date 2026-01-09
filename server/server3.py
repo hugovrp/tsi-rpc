@@ -42,17 +42,16 @@ def math_problem_solver(problem: str) -> str:
         Resolve problemas matemáticos descritos em linguagem natural usando IA.
         
         Utiliza a API do Google Gemini para interpretar e resolver problemas matemáticos expressos em texto livre.
+        Solicita uma resposta em formato JSON, realiza o tratamento de strings para remover formatação Markdown e extrai o resultado númerico.
         
         Args:
             problem (str): Descrição textual do problema matemático.
         
         Returns:
-            str: Resultado numérico com até 3 casas decimais.
-                Retorna "Erro: entrada inválida ou não matemática" se:
-                - O problema não for válido
-                - Não for uma questão matemática
-                - O resultado for impraticável
-                Retorna None em caso de erro na API.
+            str: Resultado numérico com até 3 casas decimais convertido para string.
+            str: "Erro: entrada inválida ou não matemática" se a IA identificar que o input não é um problema tratável ou
+                 se o resultado for impraticável.
+            None: Em caso de falhas técnicas.
 
         Note:
             Requer variável de ambiente GOOGLE_API_KEY configurada.
@@ -69,16 +68,26 @@ def math_problem_solver(problem: str) -> str:
         Você é um serviço de resolução de problemas matemáticos.
 
         TAREFA:
-        1. Analise se o texto abaixo descreve um problema matemático válido.
-        2. Se a operação estiver incompleta ou ambígua, retorne: ERRO
-        3. Se NÃO for um problema matemático, retorne exatamente: ERRO
-        4. Se o resultado for muito grande ou impraticável, retorne: ERRO
-        5. Se for, resolva o problema usando raciocínio passo a passo internamente.
-        6. NÃO mostre o raciocínio.
-        7. Retorne APENAS o resultado final numérico.
-        8. Se o resultado for decimal, arredonde para no máximo 3 casas decimais.
+        1. Responde APENAS em JSON.
+        2. Analise se o texto abaixo descreve um problema matemático válido.
+        3. Se a operação estiver incompleta ou ambígua, retorne exatamente um JSON: {{"erro": true}}
+        4. Se NÃO for um problema matemático, retorne exatamente um JSON: {{"erro": true}}
+        5. Se o resultado for muito grande ou impraticável, retorne exatamente um JSON: {{"erro": true}}
+        6. Se for válido, explique o raciocínio passo a passo. 
+        7. Se o resultado for decimal, arredonde para no máximo 3 casas decimais.
 
-        Texto:
+        FORMATO DE RESPOSTA (JSON VÁLIDO):
+        {{
+            "erro": false,
+            "raciocínio": [
+                "passo 1 ...",
+                "passo 2 ...",
+                "passo 3 ..."
+            ],
+            "resultado": <numero>
+        }}
+
+        TEXTO:
         {problem}
     """
 
@@ -87,15 +96,24 @@ def math_problem_solver(problem: str) -> str:
         model = genai.GenerativeModel('gemini-2.5-flash')
 
         response = model.generate_content(prompt)
-        result = response.text.strip()
 
-        if not result or result.upper() == "ERRO":
+        # Limpa o texto para garantir um JSON puro
+        content = response.text.strip()
+        if content.startswith("```"):
+            content = content.split("```")[1]
+            if content.startswith("json"):
+                content = content[4:]
+        
+        content = content.strip("`").strip()
+
+        data = json.loads(content)
+
+        if data.get('erro'):
             return "Erro: entrada inválida ou não matemática"
 
-        print(result)
-
-        return result
+        return str(data.get('resultado'))
     except Exception as e:
+        print(f"Erro: {e}")
         return None
 
 # Inicialização do servidor
